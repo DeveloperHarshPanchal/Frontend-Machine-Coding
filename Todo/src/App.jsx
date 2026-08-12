@@ -1,33 +1,31 @@
 import { useState } from "react";
 import "./App.css";
 
+import TodoForm from "./components/TodoForm";
+import TodoItem from "./components/TodoItem";
+
 function App() {
-  const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
+  const [todos, setTodos] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  // Add / Update Todo
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const value = input.trim();
-
-    if (!value) return;
+    if (!input.trim()) return;
 
     if (editId !== null) {
-      // Update existing todo
       setTodos((prevTodos) =>
         prevTodos.map((todo) =>
-          todo.id === editId ? { ...todo, text: value } : todo,
+          todo.id === editId ? { ...todo, text: input } : todo,
         ),
       );
 
       setEditId(null);
     } else {
-      // Add new todo
       const newTodo = {
         id: Date.now(),
-        text: value,
+        text: input,
         completed: false,
       };
 
@@ -37,7 +35,6 @@ function App() {
     setInput("");
   };
 
-  // Toggle completed
   const handleToggle = (id) => {
     setTodos((prevTodos) =>
       prevTodos.map((todo) =>
@@ -46,12 +43,10 @@ function App() {
     );
   };
 
-  // Delete todo
   const handleDelete = (id) => {
     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   };
 
-  // Start editing
   const handleEdit = (todo) => {
     setInput(todo.text);
     setEditId(todo.id);
@@ -62,42 +57,25 @@ function App() {
       <div className="todo-box">
         <h1>Todo App</h1>
 
-        <form onSubmit={handleSubmit} className="todo-form">
-          <input
-            type="text"
-            placeholder="Enter todo..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-
-          <button type="submit">{editId !== null ? "Update" : "Add"}</button>
-        </form>
+        <TodoForm
+          input={input}
+          setInput={setInput}
+          handleSubmit={handleSubmit}
+          editId={editId}
+        />
 
         <div className="todo-list">
           {todos.length === 0 ? (
-            <p className="empty">No todos found</p>
+            <p>No todos found</p>
           ) : (
             todos.map((todo) => (
-              <div
+              <TodoItem
                 key={todo.id}
-                className={`todo-item ${todo.completed ? "completed" : ""}`}
-              >
-                <div className="todo-left">
-                  <input
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => handleToggle(todo.id)}
-                  />
-
-                  <span>{todo.text}</span>
-                </div>
-
-                <div className="actions">
-                  <button onClick={() => handleEdit(todo)}>Edit</button>
-
-                  <button onClick={() => handleDelete(todo.id)}>Delete</button>
-                </div>
-              </div>
+                todo={todo}
+                handleToggle={handleToggle}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+              />
             ))
           )}
         </div>
